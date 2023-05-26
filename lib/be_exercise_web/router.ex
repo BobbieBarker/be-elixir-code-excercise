@@ -17,7 +17,8 @@ defmodule BeExerciseWeb.Router do
   scope "/", BeExerciseWeb do
     pipe_through :api
 
-    get "/", PageController, :ping
+    get "/users", UserController, :index
+    post "/invite-users", UserController, :invite_users
   end
 
   # Other scopes may use custom stacks.

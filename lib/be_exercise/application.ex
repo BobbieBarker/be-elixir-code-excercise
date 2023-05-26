@@ -15,7 +15,9 @@ defmodule BeExercise.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: BeExercise.PubSub},
       # Start the Endpoint (http/https)
-      BeExerciseWeb.Endpoint
+      {Task.Supervisor, name: BeExercise.UserInvitationSupervisor},
+      BeExerciseWeb.Endpoint,
+      {Cache, [BeExercise.SchemaCache.Repo.Redis]}
       # Start a worker by calling: BeExercise.Worker.start_link(arg)
       # {BeExercise.Worker, arg}
     ]
