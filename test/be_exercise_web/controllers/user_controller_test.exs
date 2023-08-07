@@ -69,14 +69,24 @@ defmodule BeExerciseWeb.UserControllerTest do
 
 
   describe "&invite_users/2" do
+    setup :verify_on_exit!
+
     test "sends invites to users", %{conn: conn} do
-      Factory.insert_many!(2, Factory.Users.User)
+      user1 = Factory.insert!(Factory.Users.User)
+      Factory.insert!(Factory.Users.Salary, %{user_id: user1.id, active: true})
+      Factory.insert!(Factory.Users.Salary, %{user_id: user1.id, active: false})
+
+      parent = self()
+      ref = make_ref()
 
       expect(
         BeExercise.MockBeChallengeex,
         :send_email,
-        2,
-        fn %User{name: name} -> {:ok, name} end
+        1,
+        fn %User{name: name} ->
+          send(parent, {ref, :temp})
+          {:ok, name}
+        end
       )
 
       resp = post(
@@ -86,6 +96,8 @@ defmodule BeExerciseWeb.UserControllerTest do
       )
 
       assert response(resp, 204)
+
+      assert_receive {^ref, :temp}
     end
   end
 end
