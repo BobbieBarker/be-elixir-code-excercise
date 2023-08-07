@@ -10,6 +10,9 @@ import Config
 config :be_exercise,
   ecto_repos: [BeExercise.Repo]
 
+config :ecto_shorts,
+  repo: BeExercise.Repo
+
 # Configures the endpoint
 config :be_exercise, BeExerciseWeb.Endpoint,
   url: [host: "localhost"],

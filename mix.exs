@@ -9,7 +9,27 @@ defmodule BeExercise.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_add_apps: [:ex_unit, :mix],
+        plt_local_path: ".check/local_plt",
+        plt_core_path: ".check/core_plt",
+        list_unused_filters: true,
+        ignore_warnings: ".check/.dialyzer-ignore.exs",
+        flags: [
+          :no_opaque,
+          :unknown,
+          :unmatched_returns,
+          :extra_return,
+          :missing_return
+        ]
+      ],
+      preferred_cli_env: [
+        credo: :test,
+        credo_diff: :test,
+        dialyzer: :test,
+        test: :test
+      ],
     ]
   end
 
@@ -45,7 +65,16 @@ defmodule BeExercise.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:be_challengex, github: "remotecom/be_challengex", tag: "0.0.1"}
+      {:money, "~> 1.12"},
+      {:be_challengex, github: "remotecom/be_challengex", tag: "0.0.1"},
+      {:ecto_shorts, "~> 2.3"},
+      {:error_message, "~> 0.3.1"},
+      {:elixir_cache, "~> 0.3.1"},
+
+      # test
+      {:faker, "~> 0.17.0", only: [:dev, :test]},
+      {:mox, "~> 1.0", only: [:test]},
+      {:dialyxir, "~> 1.3", only: :test, runtime: false}
     ]
   end
 

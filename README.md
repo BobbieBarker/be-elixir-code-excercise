@@ -82,4 +82,20 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 ## Implementation details
 
-This section is for you to fill in with any decisions you made that may be relevant. You can also change this README to fit your needs.
+* Users.find_recent_and_active_salaries/1
+  * query performance:
+    * There is probably a more elegant and possibly more performative solution available with a postgres window function. Choosing a solution for a problem like this is a balancing act between the ideal and a good enough solution to go to market with. For some platforms the current implementation of find_recent_and_active_salaries/1 might be good enough for several years. It is difficult to know what the correct answer is with out a clear picture of the production environment. The best way to get an indication would be to manually execute the query in the production database before shipping the feature to prod. Additionally, it would be a good idea to take a look at the query plan the database is generating and fix any low hanging fruit. If this kind of preliminary investigative work showed that the union query was going to produce unacceptable performance results in production then it might be time to dig in and write a window function or explore other solutions.
+  * pagination:
+    * because the results are not sorted by name with the query, we would have to rewrite the current implementation if we wanted to support pagination on this end point. If we were paginating the results of the query another possible solution would be to first select the users we need and then to load the recent and active salary info onto our paginated user results.
+* UserController.send_user_invitations/0 might not be suitable for a high volume call:
+  * Just like it says in the docs a Task.Supervisor is a single process responsible for starting other processes. If it cannot clear out it's message queue quickly enough in some applications the Task.Supervisor could become a performance bottleneck. Elixir gives us an option for addressing this bottleneck through partitioning, but depending on the needs of the business, the platform, and how the nodes look when they are running under load, we might want to consider other solutions that could give us greater garuantees or allow us to execute our business logic on a node other than our webserver. Allowing webserver CPU to be spent on handling traffic instead of background jobs. Two possible options might be erlang rpc or a job queue such as oban.
+* UserController.index/2 query param validation:
+  * Production systems have actual query param validation that return a bad request error for invalid query params. I wanted to timebox my efforts on the assignment so I opted to not implement the abstractions necessary for validating requests. Generally speaking, in my opinion, the correct way to implement query param validation on a rest endpoint for a phoenix server would be to implement a validation plug that can be invoked inside a controler like so:
+
+```elixir
+defmodule FooWeb.FooController do
+  plug Validator, IndexQueryParams when action === :index
+end
+```
+
+  The IndexQueryParams module should implement the callbacks defined in the Validator module/behavior. As well as a changeset applying our validation logic. This behaviour should be used across all validation modules allowing for a predictable and common validation interface to be consumed by our Validator plug. The behaviour should require two callbacks. First, `config/0` which indicates what part of the incoming request is to be validated, i.e: query params, body, or path. Next it should have a `validate/1` function that can be invoked to validate the subject with the changeset defined in IndexQueryParams. If the subject is invalid the request can be halted and an error immediately returned to the caller.

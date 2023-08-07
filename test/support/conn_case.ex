@@ -32,7 +32,13 @@ defmodule BeExerciseWeb.ConnCase do
   end
 
   setup tags do
-    BeExercise.DataCase.setup_sandbox(tags)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(BeExercise.Repo)
+
+    unless tags[:async] do
+      Ecto.Adapters.SQL.Sandbox.mode(BeExercise.Repo, {:shared, self()})
+    end
+
+    # BeExercise.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

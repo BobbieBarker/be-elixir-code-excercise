@@ -20,6 +20,9 @@ config :be_exercise, BeExerciseWeb.Endpoint,
   secret_key_base: "DAR5S6gIm2FrR2t/hDjavLKjsZMpcolKHNCRnSZtFdZ0CA8Ox47ZikCCK3i/xjdr",
   server: false
 
+config :be_exercise,
+  be_challengeex: BeExercise.MockBeChallengeex
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
